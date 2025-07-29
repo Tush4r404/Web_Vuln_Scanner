@@ -1,69 +1,114 @@
-# 🔍 CLI Web Application Vulnerability Scanner
+# 🔍 Web Vulnerability Scanner - CLI Edition
 
-This project is a **Command-Line Interface (CLI)-based Web Application Vulnerability Scanner** designed to identify common vulnerabilities such as **XSS, SQL Injection, CSRF**, and **security misconfigurations**. It aims to be fast, modular, and easily extensible, built using Python with modern practices.
+This is a powerful command-line-based web vulnerability scanner designed to detect common OWASP Top 10 vulnerabilities.
 
-## 🚀 Features
+## 🛠️ Features
 
-- URL crawling and form discovery
-- Detection of:
-  - Cross-Site Scripting (XSS)
-  - SQL Injection (SQLi)
-  - CSRF token absence
-  - Insecure cookies and headers
-  - Admin exposure, outdated JS, open redirects
-  - Directory listing & brute-force login
-- Summary by severity (High, Medium, Info)
-- HTML report generation and MongoDB storage support
+- Cross-Site Scripting (XSS)
+- SQL Injection (SQLi)
+- CSRF
+- Open Redirects
+- Directory Listing
+- Insecure Cookies
+- Missing Security Headers
+- Outdated JavaScript Libraries
+- Cryptographic Misconfigurations
+- Weak Login Forms
+- HTTP Method Tampering
+- Exposed Admin Panels
 
-## 🛠️ Tools & Libraries Used
+## ⚖️ Ethical Use Warning
 
-- `requests`, `BeautifulSoup`, `concurrent.futures`
-- `argparse`, `colorama`, `json`, `threading`
-- MongoDB for result storage (optional)
+> ⚠️ **This tool is strictly intended for educational purposes and authorized penetration testing only.**
+>
+> **Do not scan or attack websites without proper permission.**  
+> Unauthorized use of this scanner on live websites may be illegal and unethical.  
+> Always follow legal guidelines and obtain consent from asset owners before using this tool.
+
+---
+
+## 🧰 Tools & Libraries Used
+
+- `requests`, `BeautifulSoup`, `argparse`, `colorama`, `json`, `lxml`, `threading`, `concurrent.futures`
+- MongoDB for result storage *(optional)*
 - Python 3.8+
 
-## 📦 Project Structure
+---
+
+## 📁 Project Structure
 
 ```
-vuln_scanner/
-│
-├── scanner/                   # All scanning modules
-├── database/db.py             # MongoDB interaction
-├── utils/html_report.py       # HTML report generation
-├── cli_test_scanner.py        # Main CLI entry point
+web_vuln_scanner/
+├── cli_test_scanner.py          # Main CLI scanner entry point
+├── scanner/                     # Core scanning modules
+│   ├── crawler.py
+│   ├── xss_scanner.py
+│   ├── csrf_scanner.py
+│   ├── scanner.py
+│   └── ...
+├── database/
+│   └── db.py                    # MongoDB saving logic
+├── utils/
+│   └── html_report.py          # HTML report generator
+├── test/                        # Unit tests
+│   ├── __init__.py
+│   ├── test_crawler.py
+│   └── test_xss_scanner.py
 ├── requirements.txt
 └── README.md
 ```
 
+---
+
 ## ⚙️ How to Use
 
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 1. Clone the Repository
 
-2. **Run the scanner:**
-   ```bash
-   python cli_test_scanner.py http://example.com --verbose --html-report=report.html
-   ```
+```bash
+git clone https://github.com/Tush4r404/Web_Vuln_Scanner.git
+cd Web_Vuln_Scanner
+```
 
-## ✅ Run Tests (Optional)
+### 2. Create a Virtual Environment (Optional)
 
-To ensure the code is working as expected:
+```bash
+python -m venv venv
+venv\Scripts\activate      # Windows
+source venv/bin/activate   # Linux/macOS
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Run the Scanner
+
+```bash
+python cli_test_scanner.py http://testphp.vulnweb.com --verbose --html-report report.html
+```
+
+### 5. Run Tests (Optional)
+
 ```bash
 python -m unittest discover test
 ```
 
-## 🏆 Why This Project Stands Out
+### 6. Output Files
 
-- Modular, readable codebase
-- Real-time logging with severity color coding
-- Highly extensible with OWASP Top 10 coverage
+- `scan_log.json` – JSON formatted scan results
+- `report.html` – Optional HTML report if `--html-report` is used
 
-## 🌐 GitHub
+---
 
-[GitHub Repository](https://github.com/Tush4r404/Web_Vuln_Scanner)
+## 👨‍💻 Author
 
-## 📃 License
+**Tushar**  
+[GitHub Repo](https://github.com/Tush4r404/Web_Vuln_Scanner)
 
-MIT License
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
