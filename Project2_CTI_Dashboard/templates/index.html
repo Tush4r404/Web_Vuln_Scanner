@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cyber Threat Intelligence Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div class="loader" id="loader" style="display: none">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="container" id="report">
+      <header>
+        <h1>Cyber Threat Intelligence Dashboard</h1>
+        <button id="toggleDark" title="Toggle theme">🌙</button>
+      </header>
+
+      <form method="POST" action="/">
+        <input
+          type="text"
+          name="ioc"
+          placeholder="Enter IP or domain"
+          value="{{ selected_ioc or '' }}"
+          required
+        />
+        <div class="source-selector">
+          <label>
+            <input type="checkbox" name="source" value="vt" {% if 'vt' in
+            selected_sources %}checked{% endif %} /> VirusTotal
+          </label>
+          <label>
+            <input type="checkbox" name="source" value="abuseipdb" {% if
+            'abuseipdb' in selected_sources %}checked{% endif %} /> AbuseIPDB
+          </label>
+          <label>
+            <input type="checkbox" name="source" value="geo" {% if 'geo' in
+            selected_sources %}checked{% endif %} /> Geo Info
+          </label>
+        </div>
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+        <div class="form-buttons">
+          <button type="submit">Lookup</button>
+          <button type="button" onclick="resetPage()">Reset</button>
+        </div>
+      </form>
+
+      {% if results %}
+      <div class="result-section">
+        <h2>🔍 Lookup Result</h2>
+        <div class="output-block">
+          <strong>IOC:</strong> {{ results.id }} {% if results.type %}
+          <span class="badge">{{ results.type | upper }}</span>
+          {% endif %}
+        </div>
+
+        {% if results.virustotal %}
+        <div class="output-block">
+          <h4>🧪 VirusTotal</h4>
+          {% if results.virustotal.last_analysis_stats %}
+          <p>
+            <strong>Malicious:</strong> {{
+            results.virustotal.last_analysis_stats.malicious }}
+          </p>
+          <p>
+            <strong>Harmless:</strong> {{
+            results.virustotal.last_analysis_stats.harmless }}
+          </p>
+          <p>
+            <strong>Undetected:</strong> {{
+            results.virustotal.last_analysis_stats.undetected }}
+          </p>
+          <canvas id="vtChart" width="400" height="200"></canvas>
+          {% else %}
+          <pre>{{ results.virustotal | tojson(indent=2) }}</pre>
+          {% endif %}
+        </div>
+        {% endif %} {% if results.abuseipdb %}
+        <div class="output-block">
+          <h4>🚨 AbuseIPDB</h4>
+          {% if results.abuseipdb.abuseConfidenceScore is defined %}
+          <p>
+            <strong>Abuse Score:</strong> {{
+            results.abuseipdb.abuseConfidenceScore }}
+          </p>
+          <p><strong>ISP:</strong> {{ results.abuseipdb.isp }}</p>
+          <p><strong>Usage Type:</strong> {{ results.abuseipdb.usageType }}</p>
+          {% else %}
+          <pre>{{ results.abuseipdb | tojson(indent=2) }}</pre>
+          {% endif %}
+        </div>
+        {% endif %} {% if results.geo %}
+        <div class="output-block">
+          <h4>🌍 Geo Info</h4>
+          {% if results.geo.country %}
+          <p><strong>City:</strong> {{ results.geo.city }}</p>
+          <p><strong>Region:</strong> {{ results.geo.regionName }}</p>
+          <p><strong>Country:</strong> {{ results.geo.country }}</p>
+          <p><strong>ISP:</strong> {{ results.geo.isp }}</p>
+          <p><strong>ASN:</strong> {{ results.geo.as }}</p>
+          {% else %}
+          <p>No geographic info available.</p>
+          {% endif %}
+        </div>
+        {% endif %} {% if results.score %}
+        <div class="output-block">
+          <h4>⚠️ Threat Score</h4>
+          <div class="score">{{ results.score }}</div>
+        </div>
+        {% endif %}
+
+        <div class="download-buttons">
+          <a href="/export/json" class="download-btn">⬇️ JSON</a>
+          <a href="/export/csv" class="download-btn">⬇️ CSV</a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <script>
+      const toggle = document.getElementById("toggleDark");
+      const body = document.body;
+      const form = document.querySelector("form");
+      const loader = document.getElementById("loader");
+
+      form.addEventListener("submit", () => (loader.style.display = "flex"));
+
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        body.classList.add("dark");
+        toggle.textContent = "🌙";
+      } else {
+        toggle.textContent = "☀️";
+      }
+
+      toggle.addEventListener("click", () => {
+        const isDark = body.classList.toggle("dark");
+        toggle.textContent = isDark ? "🌙" : "☀️";
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+      });
+
+      function resetPage() {
+        const theme = localStorage.getItem("theme") || "light";
+        localStorage.setItem("theme", theme);
+        window.location.href = "/";
+      }
+    </script>
+
+    {% if results.virustotal and results.virustotal.last_analysis_stats %}
+    <script>
+      const ctx = document.getElementById("vtChart").getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Harmless", "Malicious", "Undetected"],
+          datasets: [{
+            label: "VirusTotal Scan Results",
+            data: [
+              {{ results.virustotal.last_analysis_stats.harmless or 0 }},
+              {{ results.virustotal.last_analysis_stats.malicious or 0 }},
+              {{ results.virustotal.last_analysis_stats.undetected or 0 }}
+            ],
+            borderRadius: 8,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          layout: { padding: 10 },
+          scales: {
+            x: { ticks: { color: "#ccc" }, grid: { color: "#333" } },
+            y: { beginAtZero: true, ticks: { color: "#ccc" }, grid: { color: "#333" } }
+          }
+        }
+      });
+    </script>
+    {% endif %}
+  </body>
+</html>
