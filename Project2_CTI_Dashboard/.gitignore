@@ -1,0 +1,40 @@
+# 🔐 Environment Variables
+.env
+
+# 🐍 Python Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 📦 Virtual Environment
+venv/
+ENV/
+env/
+
+# 🧪 Testing / Coverage
+htmlcov/
+.coverage
+.cache
+.nox/
+.pytest_cache/
+
+# 📁 VS Code Settings
+.vscode/
+
+# 🧠 JetBrains IDEs (PyCharm, etc.)
+.idea/
+
+# 🖼 OS-generated Files
+.DS_Store
+Thumbs.db
+
+# 📋 Logs & Reports
+*.log
+results/
+
+# 📄 PDFs or Exported HTML Reports
+*.pdf
+*.html
+
+# ⚙️ System Files
+*.swp
