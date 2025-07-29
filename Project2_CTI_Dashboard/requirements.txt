@@ -1,0 +1,8 @@
+Flask
+requests
+beautifulsoup4
+lxml
+python-dotenv
+weasyprint
+geoip2
+colorama
